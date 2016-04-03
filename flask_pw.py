@@ -10,7 +10,7 @@ from playhouse.db_url import connect
 
 __license__ = "MIT"
 __project__ = "Flask-PW"
-__version__ = "0.0.0"
+__version__ = "0.0.1"
 
 
 class Choices:
