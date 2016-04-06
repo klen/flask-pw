@@ -271,7 +271,7 @@ class Peewee(object):
             router = Router(self.database, self.app.config['PEEWEE_MIGRATIONS'])
             LOGGER.info('Migrations are done:')
             LOGGER.info('\n'.join(router.done))
-            LOGGER.info()
+            LOGGER.info('')
             LOGGER.info('Migrations are undone:')
             LOGGER.info('\n'.join(router.diff))
 
