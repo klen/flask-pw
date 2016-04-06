@@ -260,4 +260,19 @@ class Peewee(object):
             router = Router(self.database, self.app.config['PEEWEE_MIGRATIONS'])
             router.rollback(name)
 
+        @manager.command
+        def list():
+            """List migrations."""
+            from peewee_migrate.router import Router, LOGGER
+
+            LOGGER.setLevel('DEBUG')
+            LOGGER.propagate = 0
+
+            router = Router(self.database, self.app.config['PEEWEE_MIGRATIONS'])
+            LOGGER.info('Migrations are done:')
+            LOGGER.info('\n'.join(router.done))
+            LOGGER.info()
+            LOGGER.info('Migrations are undone:')
+            LOGGER.info('\n'.join(router.diff))
+
         return manager
