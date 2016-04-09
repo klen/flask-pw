@@ -20,7 +20,7 @@ The Flask-PW
 The Flask-PW -- Peewee_ ORM intergration for Flask_ framework.
 
 The plugin configures DB connection and provides some tools such as migrations
-and signals.
+and signals. It also provides Peewee_ ORM support for Flask-Debugtoolbar_
 
 .. _contents:
 
@@ -117,6 +117,29 @@ If you use `Flask-Script` just add 'db' command to your manager: ::
 And use `db create`, `db migrate` and `db rollback` commands.
 
 
+Flask-Debugtoolbar
+------------------
+
+Just add `flask_pw.debugtoolbar.PeeweeDebugPanel` to Flask-Debugtoolbar_ panels in your
+application's configuration: ::
+
+    DEBUG_TB_PANELS = [
+        'flask_debugtoolbar.panels.versions.VersionDebugPanel',
+        'flask_debugtoolbar.panels.timer.TimerDebugPanel',
+        'flask_debugtoolbar.panels.headers.HeaderDebugPanel',
+        'flask_debugtoolbar.panels.request_vars.RequestVarsDebugPanel',
+        'flask_debugtoolbar.panels.template.TemplateDebugPanel',
+        'flask_debugtoolbar.panels.sqlalchemy.SQLAlchemyDebugPanel',
+        'flask_debugtoolbar.panels.logger.LoggingPanel',
+        'flask_debugtoolbar.panels.profiler.ProfilerDebugPanel',
+
+        # Add the Peewee panel
+        'flask_pw.flask_debugtoolbar.PeeweeDebugPanel',
+    ]
+
+Enjoy!
+
+
 .. _bugtracker:
 
 Bug tracker
@@ -159,3 +182,4 @@ send a postcard to: ::
 .. _klen: https://github.com/klen
 .. _Flask: http://flask.pocoo.org/
 .. _Peewee: http://docs.peewee-orm.com/en/latest/
+.. _Flask-Debugtoolbar: https://flask-debugtoolbar.readthedocs.org/en/latest/

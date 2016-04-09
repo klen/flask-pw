@@ -48,6 +48,7 @@ setup(
         'Topic :: Utilities',
     ],
 
-    py_modules=['flask_pw'],
+    packages=['flask_pw'],
+    include_package_data=True,
     install_requires=install_requires,
 )
