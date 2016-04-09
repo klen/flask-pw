@@ -68,7 +68,7 @@ class PeeweeDebugPanel(DebugPanel):
         return 'Peewee ORM queries'
 
     def nav_title(self):
-        return 'Peewee ORM'
+        return 'Peewee ORM %s' % self.handler.amount
 
     def process_request(self, request):
         self.handler.time = time.time()
