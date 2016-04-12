@@ -12,7 +12,7 @@ from .models import Model, BaseSignalModel, Choices # noqa
 
 __license__ = "MIT"
 __project__ = "Flask-PW"
-__version__ = "0.1.3"
+__version__ = "0.1.4"
 
 
 class Peewee(object):
