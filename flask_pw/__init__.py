@@ -1,10 +1,11 @@
 import logging
+import os
 from importlib import import_module
 
 import peewee as pw
 from cached_property import cached_property
 from flask._compat import string_types
-from peewee_migrate.router import Router, LOGGER
+from peewee_migrate.router import Router
 from playhouse.db_url import connect
 
 from .models import Model, BaseSignalModel, Choices # noqa
@@ -13,6 +14,8 @@ from .models import Model, BaseSignalModel, Choices # noqa
 __license__ = "MIT"
 __project__ = "Flask-PW"
 __version__ = "0.1.4"
+
+LOGGER = logging.getLogger(__name__)
 
 
 class Peewee(object):
@@ -54,14 +57,16 @@ class Peewee(object):
             app.config['PEEWEE_MANUAL'] = True
         if not app.config['PEEWEE_MANUAL']:
             app.before_request(self.connect)
-            app.after_request(self.close)
+            app.teardown_request(self.close)
 
     def connect(self):
         """Initialize connection to databse."""
+        LOGGER.info('Connecting [%s]', os.getpid())
         return self.database.connect()
 
     def close(self, response):
         """Close connection to database."""
+        LOGGER.info('Closing [%s]', os.getpid())
         if not self.database.is_closed():
             self.database.close()
         return response
@@ -127,7 +132,7 @@ class Peewee(object):
             router = Router(self.database, self.app.config['PEEWEE_MIGRATIONS'])
             migrations = router.run(name, fake=fake)
             if migrations:
-                logging.warn('Migrations are completed: %s' % ', '.join(migrations))
+                LOGGER.warn('Migrations are completed: %s' % ', '.join(migrations))
 
         @manager.command
         def rollback(name):
