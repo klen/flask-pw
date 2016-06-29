@@ -182,7 +182,7 @@ class Peewee(object):
             return self.cmd_create(name, auto)
 
         @cli.command()
-        @click.argument('name')
+        @click.argument('name', default=None)
         @click.option('--fake', is_flag=True)
         def migrate(name, fake=False):
             """Run migrations."""
