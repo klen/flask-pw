@@ -100,64 +100,100 @@ class Peewee(object):
 
         return [m for m in models if m._meta.name not in ignore]
 
+    def cmd_create(self, name, auto=False):
+        """Create a new migration."""
+
+        LOGGER.setLevel('INFO')
+        LOGGER.propagate = 0
+
+        router = Router(self.database, self.app.config['PEEWEE_MIGRATIONS'])
+
+        if auto:
+            auto = self.models
+
+        router.create(name, auto=auto)
+
+    def cmd_migrate(self, name=None, fake=False):
+        """Run migrations."""
+        from peewee_migrate.router import Router, LOGGER
+
+        LOGGER.setLevel('INFO')
+        LOGGER.propagate = 0
+
+        router = Router(self.database, self.app.config['PEEWEE_MIGRATIONS'])
+        migrations = router.run(name, fake=fake)
+        if migrations:
+            LOGGER.warn('Migrations are completed: %s' % ', '.join(migrations))
+
+    def cmd_rollback(self, name):
+        """Rollback migrations."""
+        from peewee_migrate.router import Router, LOGGER
+
+        LOGGER.setLevel('INFO')
+        LOGGER.propagate = 0
+
+        router = Router(self.database, self.app.config['PEEWEE_MIGRATIONS'])
+        router.rollback(name)
+
+    def cmd_list(self):
+        """List migrations."""
+        from peewee_migrate.router import Router, LOGGER
+
+        LOGGER.setLevel('DEBUG')
+        LOGGER.propagate = 0
+
+        router = Router(self.database, self.app.config['PEEWEE_MIGRATIONS'])
+        LOGGER.info('Migrations are done:')
+        LOGGER.info('\n'.join(router.done))
+        LOGGER.info('')
+        LOGGER.info('Migrations are undone:')
+        LOGGER.info('\n'.join(router.diff))
+
     @cached_property
     def manager(self):
         """Integrate a Flask-Script."""
-        from flask_script import Manager
+        from flask_script import Manager, Command
 
         manager = Manager(usage="Migrate database.")
-
-        @manager.command
-        def create(name, auto=False):
-            """Create a new migration."""
-
-            LOGGER.setLevel('INFO')
-            LOGGER.propagate = 0
-
-            router = Router(self.database, self.app.config['PEEWEE_MIGRATIONS'])
-
-            if auto:
-                auto = self.models
-
-            router.create(name, auto=auto)
-
-        @manager.command
-        def migrate(name=None, fake=False):
-            """Run migrations."""
-            from peewee_migrate.router import Router, LOGGER
-
-            LOGGER.setLevel('INFO')
-            LOGGER.propagate = 0
-
-            router = Router(self.database, self.app.config['PEEWEE_MIGRATIONS'])
-            migrations = router.run(name, fake=fake)
-            if migrations:
-                LOGGER.warn('Migrations are completed: %s' % ', '.join(migrations))
-
-        @manager.command
-        def rollback(name):
-            """Rollback migrations."""
-            from peewee_migrate.router import Router, LOGGER
-
-            LOGGER.setLevel('INFO')
-            LOGGER.propagate = 0
-
-            router = Router(self.database, self.app.config['PEEWEE_MIGRATIONS'])
-            router.rollback(name)
-
-        @manager.command
-        def list():
-            """List migrations."""
-            from peewee_migrate.router import Router, LOGGER
-
-            LOGGER.setLevel('DEBUG')
-            LOGGER.propagate = 0
-
-            router = Router(self.database, self.app.config['PEEWEE_MIGRATIONS'])
-            LOGGER.info('Migrations are done:')
-            LOGGER.info('\n'.join(router.done))
-            LOGGER.info('')
-            LOGGER.info('Migrations are undone:')
-            LOGGER.info('\n'.join(router.diff))
+        manager.add_command('create', Command(self.cmd_create))
+        manager.add_command('migrate', Command(self.cmd_migrate))
+        manager.add_command('rollback', Command(self.cmd_rollback))
+        manager.add_command('list', Command(self.cmd_list))
 
         return manager
+
+    @cached_property
+    def cli(self):
+        import click
+
+        @click.group()
+        def cli():
+            """Peewee Migrations."""
+            pass
+
+        @cli.command()
+        @click.argument('name')
+        @click.option('--auto', is_flag=True)
+        def create(name, auto=False):
+            """Create a new migration."""
+            return self.cmd_create(name, auto)
+
+        @cli.command()
+        @click.argument('name')
+        @click.option('--fake', is_flag=True)
+        def migrate(name, fake=False):
+            """Run migrations."""
+            return self.cmd_migrate(name, fake)
+
+        @cli.command()
+        @click.argument('name')
+        def rollback(name):
+            """Rollback migrations."""
+            return self.cmd_rollback(name)
+
+        @cli.command()
+        def list(name):
+            """List migrations."""
+            return self.cmd_list()
+
+        return cli
