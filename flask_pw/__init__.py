@@ -169,7 +169,10 @@ class Peewee(object):
         @click.group()
         def cli():
             """Peewee Migrations."""
-            pass
+            from flask import current_app
+
+            if self.app is None:
+                self.init_app(current_app)
 
         @cli.command()
         @click.argument('name')

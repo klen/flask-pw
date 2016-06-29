@@ -116,6 +116,19 @@ If you use `Flask-Script` just add 'db' command to your manager: ::
 
 And use `db create`, `db migrate` and `db rollback` commands.
 
+If you use `Flask >= 0.11` connect the plugin's command to your CLI: ::
+
+    pw = Peewee(app)
+    app.cli.add_command(pw.cli, 'db')
+
+
+::
+
+    if __name__ == '__main__':
+        with app.app_context():
+            app.cli()
+
+
 
 Flask-Debugtoolbar
 ------------------
