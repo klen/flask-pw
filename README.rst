@@ -57,7 +57,10 @@ Flask-PW settings (default values): ::
     PEEWEE_CONNECTION_PARAMS = {}
 
     # Path to directory which contains migrations
-    PEEWEE_MIGRATIONS = 'migrations'
+    PEEWEE_MIGRATE_DIR = 'migrations'
+
+    # Name of database table with migrations
+    PEEWEE_MIGRATE_TABLE = 'migratehistory'
 
     # Path to module which contains you applications' Models
     # Needed by automatic migrations

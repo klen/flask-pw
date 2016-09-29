@@ -42,7 +42,8 @@ class Peewee(object):
         app.config.setdefault('PEEWEE_DATABASE_URI', 'sqlite:///peewee.sqlite')
         app.config.setdefault('PEEWEE_MODELS_IGNORE', [])
         app.config.setdefault('PEEWEE_MANUAL', False)
-        app.config.setdefault('PEEWEE_MIGRATIONS', 'migrations')
+        app.config.setdefault('PEEWEE_MIGRATE_DIR', 'migrations')
+        app.config.setdefault('PEEWEE_MIGRATE_TABLE', 'migratehistory')
         app.config.setdefault('PEEWEE_MODELS_CLASS', Model)
         app.config.setdefault('PEEWEE_MODELS_MODULE', '')
 
@@ -106,7 +107,9 @@ class Peewee(object):
         LOGGER.setLevel('INFO')
         LOGGER.propagate = 0
 
-        router = Router(self.database, self.app.config['PEEWEE_MIGRATIONS'])
+        router = Router(self.database,
+                        migrate_dir=self.app.config['PEEWEE_MIGRATE_DIR'],
+                        migrate_table=self.app.config['PEEWEE_MIGRATE_TABLE'])
 
         if auto:
             auto = self.models
@@ -120,7 +123,10 @@ class Peewee(object):
         LOGGER.setLevel('INFO')
         LOGGER.propagate = 0
 
-        router = Router(self.database, self.app.config['PEEWEE_MIGRATIONS'])
+        router = Router(self.database,
+                        migrate_dir=self.app.config['PEEWEE_MIGRATE_DIR'],
+                        migrate_table=self.app.config['PEEWEE_MIGRATE_TABLE'])
+
         migrations = router.run(name, fake=fake)
         if migrations:
             LOGGER.warn('Migrations are completed: %s' % ', '.join(migrations))
@@ -132,7 +138,10 @@ class Peewee(object):
         LOGGER.setLevel('INFO')
         LOGGER.propagate = 0
 
-        router = Router(self.database, self.app.config['PEEWEE_MIGRATIONS'])
+        router = Router(self.database,
+                        migrate_dir=self.app.config['PEEWEE_MIGRATE_DIR'],
+                        migrate_table=self.app.config['PEEWEE_MIGRATE_TABLE'])
+
         router.rollback(name)
 
     def cmd_list(self):
@@ -142,7 +151,10 @@ class Peewee(object):
         LOGGER.setLevel('DEBUG')
         LOGGER.propagate = 0
 
-        router = Router(self.database, self.app.config['PEEWEE_MIGRATIONS'])
+        router = Router(self.database,
+                        migrate_dir=self.app.config['PEEWEE_MIGRATE_DIR'],
+                        migrate_table=self.app.config['PEEWEE_MIGRATE_TABLE'])
+
         LOGGER.info('Migrations are done:')
         LOGGER.info('\n'.join(router.done))
         LOGGER.info('')

@@ -1,2 +1,2 @@
 Flask                   >= 0.11.1
-peewee_migrate          >= 0.4.4
+peewee_migrate          >= 0.6.2
