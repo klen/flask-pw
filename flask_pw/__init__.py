@@ -161,6 +161,19 @@ class Peewee(object):
         LOGGER.info('Migrations are undone:')
         LOGGER.info('\n'.join(router.diff))
 
+    def cmd_merge(self):
+        """Merge migrations."""
+        from peewee_migrate.router import Router, LOGGER
+
+        LOGGER.setLevel('DEBUG')
+        LOGGER.propagate = 0
+
+        router = Router(self.database,
+                        migrate_dir=self.app.config['PEEWEE_MIGRATE_DIR'],
+                        migrate_table=self.app.config['PEEWEE_MIGRATE_TABLE'])
+
+        router.merge()
+
     @cached_property
     def manager(self):
         """Integrate a Flask-Script."""
@@ -171,6 +184,7 @@ class Peewee(object):
         manager.add_command('migrate', Command(self.cmd_migrate))
         manager.add_command('rollback', Command(self.cmd_rollback))
         manager.add_command('list', Command(self.cmd_list))
+        manager.add_command('merge', Command(self.cmd_merge))
 
         return manager
 
