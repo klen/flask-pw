@@ -40,7 +40,7 @@ class Peewee(object):
 
         app.config.setdefault('PEEWEE_CONNECTION_PARAMS', {})
         app.config.setdefault('PEEWEE_DATABASE_URI', 'sqlite:///peewee.sqlite')
-        app.config.setdefault('PEEWEE_READ_SLAVES', ())
+        app.config.setdefault('PEEWEE_READ_SLAVES', '')
         app.config.setdefault('PEEWEE_MODELS_IGNORE', [])
         app.config.setdefault('PEEWEE_MANUAL', False)
         app.config.setdefault('PEEWEE_MIGRATE_DIR', 'migrations')
