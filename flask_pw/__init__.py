@@ -58,7 +58,7 @@ class Peewee(object):
         slaves = app.config['PEEWEE_READ_SLAVES']
         if isinstance(slaves, string_types):
             slaves = slaves.split(',')
-        self.slaves = [get_database(slave, **params) for slave in slaves]
+        self.slaves = [get_database(slave, **params) for slave in slaves if slave]
 
         self.database.initialize(database)
         if self.database.database == ':memory:':
