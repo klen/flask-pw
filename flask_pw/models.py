@@ -93,10 +93,27 @@ class BaseSignalModel(pw.BaseModel):
 
         if cls._meta.db_table and cls._meta.db_table != 'model':
             mcs.models.append(cls)
+
+        cls._meta.read_slaves = getattr(cls._meta, 'read_slaves', None)
+
         return cls
 
 
 class Model(with_metaclass(BaseSignalModel, pw.Model)):
+
+    @classmethod
+    def select(cls, *args, **kwargs):
+        """Support read slaves."""
+        query = super(Model, cls).select(*args, **kwargs)
+        query.database = cls._get_read_database()
+        return query
+
+    @classmethod
+    def raw(cls, *args, **kwargs):
+        query = super(Model, cls).raw(*args, **kwargs)
+        if query._sql.lower().startswith('select'):
+            query.database = cls._get_read_database()
+        return query
 
     @property
     def pk(self):
@@ -122,3 +139,11 @@ class Model(with_metaclass(BaseSignalModel, pw.Model)):
         self.pre_delete.send(self)
         super(Model, self).delete_instance(*args, **kwargs)
         self.post_delete.send(self)
+
+    @classmethod
+    def _get_read_database(cls):
+        if not cls._meta.read_slaves:
+            return cls._meta.database
+        current_idx = getattr(cls, '_read_slave_idx', -1)
+        cls._read_slave_idx = (current_idx + 1) % len(cls._meta.read_slaves)
+        return cls._meta.read_slaves[cls._read_slave_idx]

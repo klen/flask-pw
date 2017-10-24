@@ -40,6 +40,7 @@ class Peewee(object):
 
         app.config.setdefault('PEEWEE_CONNECTION_PARAMS', {})
         app.config.setdefault('PEEWEE_DATABASE_URI', 'sqlite:///peewee.sqlite')
+        app.config.setdefault('PEEWEE_READ_SLAVES', ())
         app.config.setdefault('PEEWEE_MODELS_IGNORE', [])
         app.config.setdefault('PEEWEE_MANUAL', False)
         app.config.setdefault('PEEWEE_MIGRATE_DIR', 'migrations')
@@ -48,14 +49,21 @@ class Peewee(object):
         app.config.setdefault('PEEWEE_MODELS_MODULE', '')
 
         # Initialize database
+        params = app.config['PEEWEE_CONNECTION_PARAMS']
         database = database or app.config.get('PEEWEE_DATABASE_URI')
         if not database:
             raise RuntimeError('Invalid database.')
-        if isinstance(database, string_types):
-            database = connect(database, **app.config['PEEWEE_CONNECTION_PARAMS'])
+        database = get_database(database, **params)
+
+        slaves = app.config['PEEWEE_READ_SLAVES']
+        if isinstance(slaves, string_types):
+            slaves = slaves.split(',')
+        self.slaves = [get_database(slave, **params) for slave in slaves]
+
         self.database.initialize(database)
         if self.database.database == ':memory:':
             app.config['PEEWEE_MANUAL'] = True
+
         if not app.config['PEEWEE_MANUAL']:
             app.before_request(self.connect)
             app.teardown_request(self.close)
@@ -76,7 +84,11 @@ class Peewee(object):
     def Model(self):
         """Bind model to self database."""
         Model_ = self.app.config['PEEWEE_MODELS_CLASS']
-        Meta = type('Meta', (), {'database': self.database})
+        meta_params = {'database': self.database}
+        if self.slaves:
+            meta_params['read_slaves'] = self.slaves
+
+        Meta = type('Meta', (), meta_params)
         return type('Model', (Model_,), {'Meta': Meta})
 
     @property
@@ -226,3 +238,10 @@ class Peewee(object):
             return self.cmd_list()
 
         return cli
+
+
+def get_database(obj, **params):
+    """Get database from given URI/Object."""
+    if isinstance(obj, string_types):
+        return connect(obj, **params)
+    return obj
