@@ -40,13 +40,14 @@ class Peewee(object):
 
         app.config.setdefault('PEEWEE_CONNECTION_PARAMS', {})
         app.config.setdefault('PEEWEE_DATABASE_URI', 'sqlite:///peewee.sqlite')
-        app.config.setdefault('PEEWEE_READ_SLAVES', '')
-        app.config.setdefault('PEEWEE_MODELS_IGNORE', [])
         app.config.setdefault('PEEWEE_MANUAL', False)
         app.config.setdefault('PEEWEE_MIGRATE_DIR', 'migrations')
         app.config.setdefault('PEEWEE_MIGRATE_TABLE', 'migratehistory')
         app.config.setdefault('PEEWEE_MODELS_CLASS', Model)
+        app.config.setdefault('PEEWEE_MODELS_IGNORE', [])
         app.config.setdefault('PEEWEE_MODELS_MODULE', '')
+        app.config.setdefault('PEEWEE_READ_SLAVES', '')
+        app.config.setdefault('PEEWEE_USE_READ_SLAVES', True)
 
         # Initialize database
         params = app.config['PEEWEE_CONNECTION_PARAMS']
@@ -85,7 +86,7 @@ class Peewee(object):
         """Bind model to self database."""
         Model_ = self.app.config['PEEWEE_MODELS_CLASS']
         meta_params = {'database': self.database}
-        if self.slaves:
+        if self.slaves and self.app.config['PEEWEE_USE_READ_SLAVES']:
             meta_params['read_slaves'] = self.slaves
 
         Meta = type('Meta', (), meta_params)
