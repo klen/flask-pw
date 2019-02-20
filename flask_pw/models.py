@@ -77,7 +77,7 @@ class Signal:
             receiver(instance, *args, **kwargs)
 
 
-class BaseSignalModel(pw.BaseModel):
+class BaseSignalModel(pw.ModelBase):
 
     """Create signals."""
 
@@ -91,7 +91,7 @@ class BaseSignalModel(pw.BaseModel):
         cls.post_delete = Signal()
         cls.post_save = Signal()
 
-        if cls._meta.db_table and cls._meta.db_table != 'model':
+        if cls._meta.table_name and cls._meta.table_name != 'model':
             mcs.models.append(cls)
 
         cls._meta.read_slaves = getattr(cls._meta, 'read_slaves', None)
